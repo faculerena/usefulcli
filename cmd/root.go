@@ -38,7 +38,7 @@ to quickly create a Cobra application.`,
 
 		prompt := promptui.Select{
 			Label: "What do you need?",
-			Items: []string{"Hashing", "Ping", "Wednesday", "Thursday", "Friday",
+			Items: []string{"Hashing", "Test Token", "Register", "Login", "Ping",
 				"Saturday", "Sunday"},
 		}
 
@@ -53,6 +53,12 @@ to quickly create a Cobra application.`,
 			HashingCmd.Run(cmd, args)
 		case "Ping":
 			PingCmd.Run(cmd, args)
+		case "Register":
+			registerCmd.Run(cmd, args)
+		case "Login":
+			loginCmd.Run(cmd, args)
+		case "Test Token":
+			checkTokenCmd.Run(cmd, args)
 		default:
 			os.Exit(1)
 

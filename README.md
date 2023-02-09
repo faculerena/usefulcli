@@ -11,4 +11,10 @@ This option echoes the input for security.
 
 ## Ping
 
-This only ```exec.Command()``` the ping asking for ip (blank for localhost) and port, but has flags predefined
+This only ```exec.Command()``` ping with args to check if my local servers are up
+
+## Sending requests to my Auth service
+
+- Login 
+- Register
+- Verify token

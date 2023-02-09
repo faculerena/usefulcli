@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/term"
+	"hash"
 	"log"
 	"strings"
 	"syscall"
@@ -80,8 +81,9 @@ to quickly create a Cobra application.`,
 			Size:      4,
 			Searcher:  searcher,
 		}
-
-		s, err := getInput()
+		fmt.Println("Input text to hash")
+		fmt.Print("> ")
+		s, err := getPassword()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -94,14 +96,20 @@ to quickly create a Cobra application.`,
 
 		fmt.Printf("Hashing input with %q\n", algos[i].Name)
 
+		var h hash.Hash
 		switch algos[i].Name {
 		case "SHA1":
-			s.sha1()
+			h = s.sha1()
+
 		case "SHA256":
-			s.sha256()
+			h = s.sha256()
+
 		case "SHA512":
-			s.sha512()
+			h = s.sha512()
+
 		}
+		fmt.Printf("% x\n", h.Sum(nil))
+
 	},
 }
 
@@ -127,27 +135,27 @@ type algorithms struct {
 
 type input []byte
 
-func getInput() (input, error) {
-	fmt.Println("Input text to hash")
-	fmt.Print("> ")
+func getPassword() (input, error) {
+
 	s, err := terminal.ReadPassword(0)
 	if err != nil {
 		return nil, err
 	}
 	return s, nil
 }
-func (s *input) sha1() {
+
+func (s *input) sha1() hash.Hash {
 	h := sha1.New()
 	h.Write(*s)
-	fmt.Printf("% x\n", h.Sum(nil))
+	return h
 }
-func (s *input) sha256() {
+func (s *input) sha256() hash.Hash {
 	h := sha256.New()
 	h.Write(*s)
-	fmt.Printf("% x\n", h.Sum(nil))
+	return h
 }
-func (s *input) sha512() {
+func (s *input) sha512() hash.Hash {
 	h := sha512.New()
 	h.Write(*s)
-	fmt.Printf("% x\n", h.Sum(nil))
+	return h
 }

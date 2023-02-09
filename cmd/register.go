@@ -19,13 +19,13 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"os/exec"
-	"strings"
+	"log"
+	"net/http"
 )
 
-// PingCmd represents the Ping command
-var PingCmd = &cobra.Command{
-	Use:   "Ping",
+// registerCmd represents the register command
+var registerCmd = &cobra.Command{
+	Use:   "register",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -35,40 +35,54 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var ip, port string
+		var username string
 
-		fmt.Print("Enter an ip, leave blank for localhost.\n > ")
-		fmt.Scanln(&ip)
+		//ask user
+		fmt.Printf("Enter username:\n > ")
+		fmt.Scanln(&username)
 
-		fmt.Print("Enter a port.\n > ")
-		fmt.Scanln(&port)
+		//ask psw
+		fmt.Printf("Enter password:\n > ")
+		password, err := getPassword()
 
-		var ipToPing string
-		if ip == "" {
-			ipToPing = "localhost:" + port
-		} else {
-			ipToPing = ip + ":" + port
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		out, _ := exec.Command("ping", ipToPing, "-c 5", "-i 3", "-w 10").Output()
-		if strings.Contains(string(out), "Unreachable") {
-			fmt.Println("Dead")
-		} else {
-			fmt.Println("Alive")
+		//hash psw
+		passwordHash := password.sha256()
+		pass := fmt.Sprintf("%x", passwordHash.Sum(nil))
+
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", "http://localhost:9090/auth/signup", nil)
+		if err != nil {
+			fmt.Println("Error creating request:", err)
+			return
 		}
+
+		req.Header.Add("Username", username)
+		req.Header.Add("PasswordHash", pass)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println("Error sending request:", err)
+			return
+		}
+		defer resp.Body.Close()
+
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(PingCmd)
+	rootCmd.AddCommand(registerCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// PingCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// registerCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// PingCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// registerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
